@@ -1,5 +1,7 @@
 #!/bin/bash
 ##centos7安装openvpn脚本
+
+##内网IP：192.168.10.100可以做端口映射，客户端远程公网端口映射；也可以直接配置一个公网地址。
 ##时间时区同步，修改主机名
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
