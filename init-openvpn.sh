@@ -1,8 +1,5 @@
 #!/bin/bash
 ##centos7安装openvpn脚本
-##
-sourceinstall=/usr/local/src/openvpn
-chmod -R 777 $sourceinstall
 ##时间时区同步，修改主机名
 ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
@@ -29,10 +26,8 @@ cp -r /usr/share/doc/easy-rsa-3.0.3/vars.example /etc/openvpn/easy-rsa/3.0.3/var
 #cp /usr/share/doc/openvpn-2.4.7/sample/sample-scripts/bridge-stop  /etc/openvpn/
 
 echo 'local 192.168.10.100
-;port 1194
-port 2195
-;proto udp
-proto tcp
+port 1194
+proto udp
 dev tun
 ca /etc/openvpn/easy-rsa/3.0.3/pki/ca.crt
 cert /etc/openvpn/easy-rsa/3.0.3/pki/issued/wwwserver.crt
@@ -81,7 +76,7 @@ sed -i '171c set_var EASYRSA_EXT_DIR        "$EASYRSA/x509-types"' /etc/openvpn/
 sed -i '180c set_var EASYRSA_SSL_CONF       "$EASYRSA/openssl-1.0.cnf"' /etc/openvpn/easy-rsa/3.0.3/vars 
 sed -i '192c set_var EASYRSA_DIGEST         "sha256"' /etc/openvpn/easy-rsa/3.0.3/vars 
 
-#创建CA,         设置CA密码：sanxinca.com；设置Easy-RSA CA：OpenVPN-CERTIFICATE-AUTHORITY
+#创建CA,         设置CA密码：2019xinca.com；设置Easy-RSA CA：OpenVPN-CERTIFICATE-AUTHORITY
 cd /etc/openvpn/easy-rsa/3.0.3/
 ./easyrsa init-pki
 source vars
@@ -107,11 +102,11 @@ expect {
 }
 interact ' > build-ca.exp 
 chmod +x build-ca.exp
-./build-ca.exp sanxinca.com sanxinca.com OpenVPN-CERTIFICATE-AUTHORITY
+./build-ca.exp 2019xinca.com 2019xinca.com OpenVPN-CERTIFICATE-AUTHORITY
 sleep 3
 rm -rf build-ca.exp
 
-#创建服务端证书  设置server密码：openserver.com 设置wwwserver：OpenVPN-CERTIFICATE-AUTHORITY
+#创建服务端证书  设置server密码：2019server.com 设置wwwserver：OpenVPN-CERTIFICATE-AUTHORITY
 echo "now let's begin /etc/openvpn/easy-rsa/3.0.3/easyrsa gen-req wwwserver"
 if [ ! -e /usr/bin/expect ] 
  then  yum install expect -y 
@@ -129,12 +124,12 @@ expect {
 }
 interact ' > wwwserver.exp 
 chmod +x wwwserver.exp
-./wwwserver.exp openserver.com openserver.com OpenVPN-CERTIFICATE-AUTHORITY
+./wwwserver.exp 2019server.com 2019server.com OpenVPN-CERTIFICATE-AUTHORITY
 sleep 3
 rm -rf  wwwserver.exp
 
 
-#签发证书,签约服务端证书 输入yes签发证书，输入ca密码：sanxinca.com
+#签发证书,签约服务端证书 输入yes签发证书，输入ca密码：2019xinca.com
 echo "now let's begin /etc/openvpn/easy-rsa/3.0.3/easyrsa sign-req server wwwserver "
 if [ ! -e /usr/bin/expect ] 
  then  yum install expect -y 
@@ -149,12 +144,12 @@ expect {
 }
 interact ' > sign-req.exp 
 chmod +x sign-req.exp
-./sign-req.exp sanxinca.com 
+./sign-req.exp 2019xinca.com 
 sleep 3
 rm -rf  sign-req.exp
 
 
-#生成windows客户端用户：设置密码（123456） 注：结束前会提示输入ca密码：sanxinca.com
+#生成windows客户端用户：设置密码（123456） 注：结束前会提示输入ca密码：2019xinca.com
 echo "now let's begin /etc/openvpn/easy-rsa/3.0.3/easyrsa build-client-full www001"
 if [ ! -e /usr/bin/expect ] 
  then  yum install expect -y 
@@ -172,7 +167,7 @@ expect {
 }
 interact ' > client.exp 
 chmod +x client.exp
-./client.exp 123456 123456 sanxinca.com
+./client.exp 123456 123456 2019xinca.com
 sleep 3
 rm -rf  client.exp
 
@@ -185,7 +180,7 @@ systemctl start firewalld.service
 firewall-cmd --state
 firewall-cmd --zone=public --list-all
 firewall-cmd --add-service=openvpn --permanent
-firewall-cmd --add-port=2195/tcp --permanent
+firewall-cmd --add-port=1194/udp --permanent
 firewall-cmd --add-port=22/tcp --permanent
 firewall-cmd --add-source=10.8.0.0 --permanent
 firewall-cmd --query-source=10.8.0.0 --permanent
@@ -195,10 +190,10 @@ systemctl restart firewalld
 firewall-cmd --list-all
 
 #配置nat转发(注意修改网卡名称)
-iptables -t nat -A POSTROUTING -o ens192 -j MASQUERADE 
-iptables -t nat -A POSTROUTING -s 10.8.0.0/16 -o ens192 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o ens33 -j MASQUERADE 
+iptables -t nat -A POSTROUTING -s 10.8.0.0/16 -o ens33 -j MASQUERADE
 
-#启动openvpn： 启动时输入服务端证书密码：openserver.com
+#启动openvpn： 启动时输入服务端证书密码：2019server.com
 setenforce permissive
 getenforce
 systemctl start openvpn@server
@@ -213,10 +208,10 @@ cp -r /etc/openvpn/ta.key /etc/openvpn/client/
 #客户端配置文件www001.ovpn（ip换为openvpn服务器外网ip）
 echo 'client
 dev tun
-proto tcp
+proto udp
 resolv-retry infinite
 nobind
-remote 192.168.10.100 2195 
+remote 192.168.10.100 1194
 ns-cert-type server
 comp-lzo
 ca ca.crt
