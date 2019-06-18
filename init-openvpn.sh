@@ -231,3 +231,4 @@ status www001-status.log
 log-append www001.log
 ' > /etc/openvpn/client/www001.ovpn
 #安装OpenVPN客户端后，清空config文件夹，将www001.crt、www001.key、ca.crt、ta.key、www001.ovpn放入config中
+
