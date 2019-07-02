@@ -201,6 +201,25 @@ getenforce
 systemctl start openvpn@server
 ps -aux |grep openvpn
 
+echo "now let's begin systemctl start openvpn@server"
+if [ ! -e /usr/bin/expect ] 
+ then  yum install expect -y 
+fi
+echo '#!/usr/bin/expect
+set timeout 60
+set openvpnpasswd [lindex $argv 0 ] 
+spawn systemctl start openvpn@server
+expect {
+"Enter Private Key Password:" {send "$openvpnpasswd\r"}
+}
+interact ' > openvpnstart.exp 
+chmod +x openvpnstart.exp
+./openvpnstart.exp 2019server.com
+./openvpnstart.exp 2019server.com
+echo '0 1 * * * root /etc/openvpn/easy-rsa/3.0.3/openvpnstart.exp 2019server.com > /dev/null 2>&1' >> /etc/crontab 
+crontab /etc/crontab
+crontab -l
+
 #windows 64位官网下载就可以,客户端需要的证书：www001.crt、www001.key、ca.crt、ta.key
 mkdir -p /etc/openvpn/client
 cp -r /etc/openvpn/easy-rsa/3.0.3/pki/issued/www001.crt /etc/openvpn/client/
