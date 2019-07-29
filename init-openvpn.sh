@@ -40,7 +40,6 @@ server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt
 push "redirect-gateway def1 bypass-dhcp"
 push "dhcp-option DNS 202.103.24.68"
-push "dhcp-option DNS 114.114.114.114"
 push "route 192.168.10.0 255.255.255.0"
 client-to-client
 keepalive 10 120
