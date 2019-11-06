@@ -85,7 +85,6 @@ source vars
 openvpn --genkey --secret ta.key
 cp -r ta.key /etc/openvpn/
 
-
 echo "now let's begin /etc/openvpn/easy-rsa/3.0.3/easyrsa build-ca"
 if [ ! -e /usr/bin/expect ] 
  then  yum install expect -y 
